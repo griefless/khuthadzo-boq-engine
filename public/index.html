@@ -1,248 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Khuthadzo V4 BOQ Engine</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Khuthadzo V4 BOQ Engine</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; }
-.gradient-text { background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-.drop-zone { transition: all 0.3s ease; border: 2px dashed rgba(245, 158, 11, 0.3); }
-.drop-zone:hover, .drop-zone.dragover { background: rgba(245, 158, 11, 0.05); border-color: #f59e0b; }
-.btn-action { background: linear-gradient(90deg, #f59e0b, #d97706); color: black; font-weight: bold; transition: transform 0.2s; }
-.btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
-.btn-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-.tab-btn { padding: 8px 16px; cursor: pointer; border-bottom: 2px solid transparent; color: #94a3b8; }
-.tab-btn.active { color: #f59e0b; border-bottom-color: #f59e0b; }
-.table-data { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.table-data th { background: rgba(245, 158, 11, 0.1); color: #f59e0b; text-align: left; padding: 8px; font-size: 0.75rem; text-transform: uppercase; }
-.table-data td { padding: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}.gradient-text{background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.glass{background:rgba(15,23,42,0.8);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.06)}.glass-light{background:rgba(30,41,59,0.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.04)}.drop-zone{border:2px dashed rgba(245,158,11,0.25);transition:all .3s}.drop-zone:hover,.drop-zone.dragover{border-color:#f59e0b;background:rgba(245,158,11,0.05);box-shadow:0 0 40px rgba(245,158,11,0.1)}.stat-card{background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.05));border:1px solid rgba(245,158,11,0.15);border-radius:12px;padding:16px;text-align:center}.btn-primary{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:700;padding:12px 32px;border-radius:8px;border:none;cursor:pointer;transition:all .3s;font-size:.9rem}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,158,11,0.3)}.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}.scroll-table{overflow-x:auto;max-height:650px;overflow-y:auto}.scroll-table::-webkit-scrollbar{width:6px;height:6px}.scroll-table::-webkit-scrollbar-track{background:rgba(255,255,255,0.02)}.scroll-table::-webkit-scrollbar-thumb{background:rgba(245,158,11,0.3);border-radius:3px}.data-table{width:100%;border-collapse:separate;border-spacing:0}.data-table th{background:rgba(245,158,11,0.1);color:#f59e0b;font-weight:700;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid rgba(245,158,11,0.2);position:sticky;top:0;z-index:10}.data-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:.78rem;vertical-align:top}.log-line{font-family:'Courier New',monospace;font-size:.72rem;color:#94a3b8;padding:2px 0}.log-line.success{color:#22c55e}.log-line.warn{color:#f59e0b}.log-line.error{color:#ef4444}
+.tab-btn{padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;color:#94a3b8;transition:all .3s}.tab-btn.active{color:#f59e0b;border-bottom-color:#f59e0b}
 </style>
 </head>
-<body class="p-6 max-w-6xl mx-auto">
-  <header class="mb-8 border-b border-gray-700 pb-4 flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight">Khuthadzo <span class="gradient-text">Supplies</span></h1>
-      <p class="text-xs text-slate-400 mt-1">BOQ Price Intelligence Engine v4.0 • SA Market Live Data</p>
-    </div>
-    <div class="text-right">
-      <span class="bg-green-900/30 text-green-400 px-2 py-1 rounded text-xs">● Live Research Active</span>
-      <p class="text-[10px] text-slate-500 mt-1">MBSA • BIBC • CETA Compliant</p>
-    </div>
-  </header>
+<body class="min-h-screen">
+<header class="border-b border-white/5"><div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-red-500 flex items-center justify-center"><i class="fas fa-bolt text-black text-base"></i></div><div><h1 class="text-base font-bold tracking-tight">Khuthadzo <span class="gradient-text">Supplies V4</span></h1><p class="text-[10px] text-slate-500">Specification Compliant Pricing Engine</p></div></div><div class="flex items-center gap-4"><span class="text-[10px] text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i>MBSA • BIBC • CETA • SCRAPERAPI</span></div></div></header>
+<main class="max-w-7xl mx-auto px-6 py-8"><section id="inputSection" class="fade-in">
+<div class="text-center mb-8"><h2 class="text-3xl font-bold mb-2">Upload Your <span class="gradient-text">Bill of Quantities</span></h2><p class="text-slate-400 text-sm max-w-2xl mx-auto">Supports PDF, Excel, Word, Images (OCR), Text. Full Spec Compliance.</p></div>
+<div class="max-w-4xl mx-auto">
+<div id="dropZone" class="drop-zone rounded-2xl p-10 text-center mb-6 cursor-pointer">
+<input type="file" id="fileInput" class="hidden" accept=".pdf,.xlsx,.xls,.csv,.txt,.docx,.jpg,.png">
+<div class="mb-4"><i class="fas fa-cloud-upload-alt text-5xl text-amber-500/30"></i></div>
+<p class="text-sm text-slate-400 mb-2">Drag & drop BOQ file here, or <span class="text-amber-500 font-semibold cursor-pointer" onclick="document.getElementById('fileInput').click()">browse files</span></p>
+<p class="text-xs text-slate-600">PDF • XLSX • DOCX • JPG • PNG • TXT</p>
+</div>
+<div class="glass rounded-2xl p-6">
+<div class="flex items-center justify-between mb-3"><label class="text-sm font-semibold text-slate-300"><i class="fas fa-paste text-amber-500 mr-2"></i>Or Paste Data</label><div class="flex gap-2"><button onclick="loadSample()" class="text-xs px-3 py-1 rounded-md bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition">Load Sample</button><button onclick="clearInput()" class="text-xs px-3 py-1 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">Clear</button></div></div>
+<textarea id="boqInput" rows="8" class="w-full bg-slate-900/50 border border-white/10 rounded-xl p-4 text-sm text-slate-300 font-mono resize-none focus:outline-none focus:border-amber-500/50" placeholder="Paste raw text or BOQ data here..."></textarea>
+<div class="flex items-center justify-between mt-4"><div class="flex items-center gap-4 text-xs text-slate-500"><span id="lineCount">0 lines</span><span id="itemCount">0 items detected</span><span id="fileInfo" class="text-amber-500"></span></div><button id="processBtn" onclick="startProcessing()" class="btn-primary" disabled><i class="fas fa-search-dollar mr-2"></i>Research & Price (V4 Spec)</button></div>
+</div>
+</div>
+</section>
 
-  <!-- Input Section -->
-  <section id="inputSection">
-    <div class="glass rounded-xl p-8 text-center mb-6">
-      <h2 class="text-lg font-semibold mb-2">Upload Your Bill of Quantities</h2>
-      <p class="text-sm text-slate-400 mb-4">Supports PDF, Excel, Word, Images (OCR), and Text.</p>
-      
-      <div id="dropZone" class="drop-zone rounded-lg p-8 cursor-pointer relative">
-        <input type="file" id="fileInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.xlsx,.xls,.csv,.txt,.docx,.jpg,.png">
-        <i class="fas fa-cloud-upload-alt text-3xl text-amber-500/30 mb-2"></i>
-        <p class="text-sm text-slate-300">Drag & drop file or <span class="text-amber-400 underline">browse</span></p>
-        <div class="mt-2 text-xs text-slate-500">PDF • XLSX • DOCX • JPG • PNG</div>
-      </div>
+<section id="processingSection" class="hidden"><div class="max-w-3xl mx-auto text-center mb-8"><h2 class="text-2xl font-bold mb-2">Executing Live Research Pipeline...</h2><div class="progress-bar mt-4 max-w-md mx-auto"><div id="progressFill" class="progress-bar-fill" style="width:0%"></div></div><p class="text-xs text-slate-500 mt-2" id="statusMsg">Initializing...</p></div><div id="liveLog" class="max-w-3xl mx-auto glass-light rounded-xl p-4 max-h-48 overflow-y-auto"><div id="logContent"></div></div></section>
 
-      <div class="mt-6">
-        <textarea id="boqInput" rows="6" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg p-3 text-sm text-slate-300 focus:border-amber-500 outline-none" placeholder="Or paste raw BOQ data here..."></textarea>
-        
-        <div class="flex justify-between items-center mt-4">
-          <div class="text-xs text-slate-500">
-            <span id="lineCount">0 lines</span> | <span id="itemCount">0 items detected</span>
-          </div>
-          <button id="processBtn" onclick="runPipeline()" class="btn-action px-6 py-2 rounded-md" disabled>
-            <i class="fas fa-search-dollar mr-2"></i>Research & Price
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
+<section id="resultsSection" class="hidden">
+<div class="flex border-b border-white/10 mb-6" id="tabsNav">
+<button class="tab-btn active" onclick="switchTab(0)">Tab 1: Priced BOQ (Materials)</button>
+<button class="tab-btn" onclick="switchTab(1)">Tab 2: Labour & Installation</button>
+<button class="tab-btn" onclick="switchTab(2)">Tab 3: Financial Summary</button>
+<button class="tab-btn" onclick="switchTab(3)">Tab 4: Evidence Log</button>
+</div>
 
-  <!-- Processing Section -->
-  <section id="processingSection" class="hidden max-w-3xl mx-auto text-center my-12">
-    <h3 class="text-xl font-bold gradient-text mb-4">Executing Pricing Pipeline...</h3>
-    <div class="h-1 bg-gray-700 rounded-full overflow-hidden mb-4"><div id="progressBar" class="h-full bg-amber-500 transition-all duration-300" style="width: 0%"></div></div>
-    <div id="logArea" class="bg-black/40 rounded-lg p-4 text-left h-48 overflow-y-auto text-xs font-mono space-y-1"></div>
-  </section>
+<div id="tab0" class="glass rounded-2xl p-6 mb-6 fade-in"><h3 class="text-lg font-bold text-amber-500 mb-4">Tab 1 — Priced BOQ (Materials & Supply)</h3><div class="scroll-table"><table class="data-table" id="matTable"><thead><tr><th>Item</th><th>Description</th><th>Unit</th><th>Qty</th><th>Unit Rate (R)</th><th>Total (R)</th><th>Cheapest Supplier</th><th>Supplier URL</th><th>Notes / Flags</th></tr></thead><tbody id="matBody"></tbody></table></div></div>
 
-  <!-- Results Section -->
-  <section id="resultsSection" class="hidden">
-    <div class="flex gap-4 mb-6 border-b border-gray-700 pb-2">
-      <button class="tab-btn active" onclick="switchTab(0)">Materials</button>
-      <button class="tab-btn" onclick="switchTab(1)">Labour Rates</button>
-      <button class="tab-btn" onclick="switchTab(2)">Financial Summary</button>
-    </div>
+<div id="tab1" class="glass rounded-2xl p-6 mb-6 hidden fade-in"><h3 class="text-lg font-bold text-amber-500 mb-4">Tab 2 — Labour & Installation Rates</h3><div class="scroll-table"><table class="data-table"><thead><tr><th>Item</th><th>Description</th><th>Trade / Skill Level</th><th>Unit</th><th>Qty</th><th>Rate (R)</th><th>Total (R)</th><th>Source Authority</th><th>Flag</th></tr></thead><tbody id="labBody"></tbody></table></div></div>
 
-    <div id="matTab" class="glass rounded-xl p-4 mb-6 overflow-x-auto">
-      <table class="table-data" id="matTable">
-        <thead><tr><th>No</th><th>Description</th><th>Unit</th><th>Qty</th><th>Rate (R)</th><th>Total (R)</th><th>Supplier</th></tr></thead>
-        <tbody id="matBody"></tbody>
-      </table>
-    </div>
+<div id="tab2" class="glass rounded-2xl p-6 mb-6 hidden fade-in"><h3 class="text-lg font-bold text-amber-500 mb-4">Tab 3 — Pricing Summary</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-3"><div class="flex justify-between p-3 rounded bg-white/5"><span class="text-sm">Total Material Cost (excl. VAT)</span><span class="font-mono font-bold" id="sumMat">R 0,00</span></div><div class="flex justify-between p-3 rounded bg-white/5"><span class="text-sm">Total Labour Cost (Guideline)</span><span class="font-mono font-bold" id="sumLab">R 0,00</span></div><div class="flex justify-between p-3 rounded bg-white/5"><span class="text-sm">Contingency (if applicable)</span><span class="font-mono font-bold">R 0,00</span></div></div>
+<div class="space-y-3"><div class="flex justify-between p-3 rounded bg-white/5"><span class="text-sm">Sub-Total</span><span class="font-mono font-bold" id="sumSub">R 0,00</span></div><div class="flex justify-between p-3 rounded bg-white/5"><span class="text-sm">VAT @ 15%</span><span class="font-mono font-bold" id="sumVat">R 0,00</span></div><div class="flex justify-between p-3 rounded bg-amber-500/20 border border-amber-500/50"><span class="text-sm font-bold">Grand Total Bid Value</span><span class="text-lg font-mono font-black text-amber-400" id="sumGrand">R 0,00</span></div></div>
+</div></div>
 
-    <div id="labTab" class="glass rounded-xl p-4 mb-6 overflow-x-auto hidden">
-      <table class="table-data" id="labTable">
-        <thead><tr><th>No</th><th>Description</th><th>Trade</th><th>Rate (R)</th><th>Total (R)</th></tr></thead>
-        <tbody id="labBody"></tbody>
-      </table>
-    </div>
+<div id="tab3" class="glass rounded-2xl p-6 mb-6 hidden fade-in"><h3 class="text-lg font-bold text-amber-500 mb-4">Tab 4 — Supplier Evidence Log</h3><div class="scroll-table"><table class="data-table"><thead><tr><th>Item</th><th>Supplier Name</th><th>URL</th><th>Price Found (R)</th><th>In Stock</th><th>Date Retrieved</th><th>Rank</th></tr></thead><tbody id="evidBody"></tbody></table></div></div>
 
-    <div id="sumTab" class="glass rounded-xl p-6 hidden">
-      <div class="space-y-3 text-sm">
-        <div class="flex justify-between border-b border-gray-700 pb-2"><span>Material Subtotal</span><span id="sumMat" class="font-bold">R 0,00</span></div>
-        <div class="flex justify-between border-b border-gray-700 pb-2"><span>Labor Cost (Guideline)</span><span id="sumLab" class="font-bold">R 0,00</span></div>
-        <div class="flex justify-between border-b border-gray-700 pb-2"><span>VAT (15%)</span><span id="sumVat" class="font-bold">R 0,00</span></div>
-        <div class="flex justify-between pt-2 text-lg"><span class="font-bold gradient-text">Grand Total</span><span id="sumTotal" class="font-bold text-amber-400">R 0,00</span></div>
-      </div>
-    </div>
-    
-    <button onclick="window.print()" class="mt-6 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm">Export Report / Print</button>
-  </section>
+<button onclick="exportCSV()" class="fixed bottom-8 right-8 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-full shadow-lg z-50"><i class="fas fa-file-csv mr-2"></i>Export Full Report</button>
+</section>
+</main>
 
 <script>
-// --- Configuration & Taxonomy ---
-const TRADE_TAXONOMY = {
-  'Electrical': ['cable', 'switch', 'db board', 'contactor', 'relay', 'fuse', 'breaker', 'ammeter', 'voltmeter', 'transformer', 'surge', 'earthing', 'lamp', 'luminaire', 'panel'],
-  'Plumbing': ['pipe', 'valve', 'tap', 'faucet', 'toilet', 'basin', 'drain', 'sewer', 'water', 'pump', 'fitting', 'joint', 'geyser', 'cistern'],
-  'Civil': ['concrete', 'cement', 'brick', 'block', 'sand', 'stone', 'rebar', 'mesh', 'shutter', 'scaffold', 'bitumen', 'kerb'],
-  'General': ['helmet', 'boot', 'glove', 'spectacle', 'suit', 'vest', 'harness', 'cone', 'signage']
-};
+const TRADE_TAXONOMY={'Electrical':{keywords:['cable','switch','db board','contactor','relay','fuse','breaker','ammeter','voltmeter','transformer','surge','earthing','lamp','luminaire','switchgear','panel','conduit','tray','isolator','circuit breaker']},'Plumbing & Drainage':{keywords:['pipe','valve','tap','faucet','toilet','basin','drain','sewer','water','pump','fitting','joint','elbow','tee','flange','geyser','cistern']},'Civil & Construction':{keywords:['concrete','cement','brick','block','sand','stone','aggregate','gravel','reinforcing','rebar','mesh','shutter','scaffold','bitumen','asphalt','kerb','paving','steel','structural']},'Mechanical & HVAC':{keywords:['duct','fan','chiller','ahu','fcu','split','ventilation','grille','diffuser','damper','compressor','condenser','evaporator','refrigerant','ac','heating']},'Fencing & Security':{keywords:['fence','gate','mesh','post','palisade','boom','cctv','camera','intercom','electric fence','strand','dropper','lock','security door','burglar bar']},'General & PPE':{keywords:['helmet','boot','glove','spectacle','earmuff','suit','vest','harness','extinguisher','cone','signage','lubricant','tool','consumable','paint','tape','marker']},'Health & Medical':{keywords:['bandage','mask','glove medical','antiseptic','bedside','monitor','stethoscope','defibrillator','syringe','gown','sterile','disposable']},'Electronics & ICT':{keywords:['router','switch network','patch panel','modem','wifi','server','rack','ups','keyboard','mouse','monitor cctv','printer','cabling data']}};
+let parsedItems=[], materialResults=[], labourResults=[], evidenceData=[];
 
-let parsedItems = [];
+document.getElementById('dropZone').addEventListener('dragover',e=>{e.preventDefault();document.getElementById('dropZone').classList.add('dragover');});
+document.getElementById('dropZone').addEventListener('dragleave',()=>document.getElementById('dropZone').classList.remove('dragover'));
+document.getElementById('dropZone').addEventListener('drop',e=>{e.preventDefault();document.getElementById('dropZone').classList.remove('dragover');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
+document.getElementById('boqInput').addEventListener('input',updateStats);
 
-// --- File Handling ---
-document.getElementById('dropZone').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); });
-document.getElementById('dropZone').addEventListener('dragleave', () => document.getElementById('dropZone').classList.remove('dragover'));
-document.getElementById('dropZone').addEventListener('drop', e => {
-  e.preventDefault();
-  document.getElementById('dropZone').classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if(file) processFile(file);
-});
-
-document.getElementById('fileInput').addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
-document.getElementById('boqInput').addEventListener('input', updateStats);
-
-async function processFile(file) {
-  document.getElementById('lineCount').textContent = "Parsing " + file.name + "...";
-  const ext = file.name.split('.').pop().toLowerCase();
-  try {
-    if (ext === 'pdf') {
-      const ab = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({data: ab}).promise;
-      let txt = '';
-      for(let i=1; i<=pdf.numPages; i++) { txt += (await pdf.getPage(i)).getTextContent().items.map(it => it.str).join(' ') + '\n'; }
-      document.getElementById('boqInput').value = txt;
-    } else if (['xlsx', 'xls'].includes(ext)) {
-      const ab = await file.arrayBuffer();
-      const wb = XLSX.read(ab, {type:'array'});
-      let txt = '';
-      for(const s of wb.SheetNames) {
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[s], {header:1, defval:''});
-        rows.forEach(r => txt += r.join('\t') + '\n');
+async function handleFile(file){
+document.getElementById('fileInfo').textContent='📄 '+file.name+' ('+(file.size/1024).toFixed(1)+' KB)';
+const ext=file.name.split('.').pop().toLowerCase();
+try{
+  // Add null checks here to prevent "undefined" errors
+  if(!file || !file.name) {
+    alert('Invalid file selected. Please try again.');
+    return;
+  }
+  
+  if(ext==='pdf'){
+    try {
+      const ab=await file.arrayBuffer(); 
+      const pdf=await pdfjsLib.getDocument({data:ab}).promise; 
+      let txt=''; 
+      for(let i=1;i<=pdf.numPages;i++){ 
+        const pg=await pdf.getPage(i); 
+        const ct=await pg.getTextContent(); 
+        txt+=ct.items.map(it=>it.str).join(' ')+'\n'; 
       }
-      document.getElementById('boqInput').value = txt;
-    } else {
-      document.getElementById('boqInput').value = await file.text();
+      document.getElementById('boqInput').value=txt;
+    } catch(err) {
+      alert('Error reading PDF: ' + err.message);
     }
-    updateStats();
-  } catch(err) { alert('Error reading file: ' + err.message); }
+  }
+  else if(['xlsx','xls'].includes(ext)){
+    try {
+      const ab=await file.arrayBuffer(); 
+      const wb=XLSX.read(ab,{type:'array'}); 
+      let txt=''; 
+      for(const s of wb.SheetNames){ 
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[s],{header:1,defval:''}); 
+        rows.forEach(r=>txt+=r.join('\t')+'\n'); 
+      }
+      document.getElementById('boqInput').value=txt;
+    } catch(err) {
+      alert('Error reading Excel: ' + err.message);
+    }
+  }
+  else if(ext==='docx'){
+    try {
+      const ab=await file.arrayBuffer(); 
+      const result=await mammoth.extractRawText({arrayBuffer:ab}); 
+      document.getElementById('boqInput').value=result.value;
+    } catch(err) {
+      alert('Error reading Word document: ' + err.message);
+    }
+  }
+  else {
+    try {
+      document.getElementById('boqInput').value=await file.text();
+    } catch(err) {
+      alert('Error reading file: ' + err.message);
+    }
+  }
+  updateStats();
+}catch(err){alert('File Parse Error: '+err.message);}
 }
 
-function updateStats() {
-  const txt = document.getElementById('boqInput').value;
-  const lines = txt.split('\n').filter(l => l.trim());
-  document.getElementById('lineCount').textContent = lines.length + ' lines';
-  const items = lines.filter(l => /^\d+[\.\d]*\s/.test(l.trim()));
-  document.getElementById('itemCount').textContent = items.length + ' items detected';
-  document.getElementById('processBtn').disabled = items.length < 1;
+function updateStats(){
+  const txt=document.getElementById('boqInput').value || '';
+  const lines=txt.split('\n').filter(l=>l.trim());
+  document.getElementById('lineCount').textContent=lines.length+' lines';
+  const items=lines.filter(l=>/^\d+[\.\d]*\s/.test(l.trim()));
+  document.getElementById('itemCount').textContent=items.length+' items detected';
+  document.getElementById('processBtn').disabled=items.length<1;
 }
 
-// --- Core Logic ---
-function parseText(text) {
-  return text.split('\n')
-    .map(l => l.split('\t'))
-    .filter(row => row.length >= 4 && row[0] && row[2])
-    .map(row => {
-      const [num, _, desc, unit, qtyStr] = row;
-      const qty = parseFloat(qtyStr) || 0;
-      // Detect Labour Keywords
-      const isLab = /remove\s.*install|install\s|lay\s|fix\s|erect|excavat|demolish|paint/i.test(desc.toLowerCase());
-      // Classify Category
-      const catKey = Object.keys(TRADE_TAXONOMY).find(k => TRADE_TAXONOMY[k].some(kw => desc.toLowerCase().includes(kw))) || 'General';
-      return { no: num, desc, unit, qty, category: isLab ? 'Labour' : catKey, isLabour: isLab };
-    });
+function parseBOQ(text){
+  // Add null check here
+  if(!text) return [];
+  
+  const rows=text.split('\n').map(l=>l.split('\t').map(c=>c.trim()));
+  const items=[]; let sec='';
+  for(const row of rows){
+    if(row.length<4) continue;
+    const [num,spec,desc,unit,qtyStr]=row;
+    const qty=parseFloat(qtyStr)||0;
+    if(!num&&!desc) continue;
+    const cleanDesc=desc.replace(/supply\s*and\s*deliver|remove\s*and\s*install|install|complete|or\s+equivalent|or\s+equivelant/gi,'').replace(/\(.*?\)/g,'').replace(/with\s+.*$/gi,'').trim();
+    const isLabour=/remove\s*and\s*install|install\s|lay\s|fix\s|erect|excavat|demolish|paint|plaster|weld|connect|terminate|commission|test\s|hang|construct/i.test(desc);
+    const cat=isLabour?'Labour & Installation':Object.entries(TRADE_TAXONOMY).find(([k,v])=>cleanDesc.split(' ').some(w=>v.keywords.some(kw=>w.includes(kw))))?[0]:'General & PPE';
+    if(!num&&desc.toUpperCase().match(/^SECTION\s+[A-Z]|TOTAL\s*SECTION/)) continue;
+    items.push({no:num, desc:cleanDesc||desc, unit, qty, category:cat, isLabour, spec});
+    if(num&&!isLabour&&/[A-Z]/.test(num)) sec=num;
+  }
+  return items;
 }
 
-async function runPipeline() {
+async function startProcessing(){
   document.getElementById('inputSection').classList.add('hidden');
   document.getElementById('processingSection').classList.remove('hidden');
-  const log = document.getElementById('logArea');
-  const bar = document.getElementById('progressBar');
+  const log=document.getElementById('logContent'); log.innerHTML='<p class="log-line">▶ Starting Specification V4 Pipeline...</p>';
   
-  parsedItems = parseText(document.getElementById('boqInput').value);
-  log.innerHTML += `<div class="text-green-400">✔ Parsed ${parsedItems.length} items.</div>`;
-  bar.style.width = '30%';
+  // Add null check here
+  const inputText = document.getElementById('boqInput').value || '';
+  parsedItems=parseBOQ(inputText);
   
-  try {
-    const res = await fetch('/api/research', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ items: parsedItems })
-    });
-    const data = await res.json();
+  log.innerHTML+='<p class="log-line success">✔ Document parsed. '+parsedItems.length+' valid line items identified.</p>';
+  log.innerHTML+='<p class="log-line">▶ Separating Materials vs Labour & Classifying Taxonomy...</p>';
+  
+  try{
+    const res=await fetch('/api/research',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:parsedItems})});
+    const data=await res.json();
     if(!data.success) throw new Error(data.error);
+    materialResults=data.materials; labourResults=data.labour;
+    evidenceData=[]; materialResults.forEach(m=>{if(m.allSuppliers) m.allSuppliers.forEach(s=>evidenceData.push({...s,itemNo:m.no}))});
     
-    bar.style.width = '90%';
-    renderResults(data.materials, data.labour);
-    
-    log.innerHTML += `<div class="text-green-400">✔ Done. Prices updated.</div>`;
-    setTimeout(() => {
-      document.getElementById('processingSection').classList.add('hidden');
-      document.getElementById('resultsSection').classList.remove('hidden');
-    }, 500);
-  } catch(err) {
-    log.innerHTML += `<div class="text-red-400">✗ Error: ${err.message}</div>`;
+    log.innerHTML+='<p class="log-line success">✔ Live Web Search Complete. Validating SABS/SANS & Date Aging...</p>';
+    log.innerHTML+='<p class="log-line success">✔ Generating Structured Output...</p>';
+    renderOutput(parsedItems,materialResults,labourResults,evidenceData);
+    document.getElementById('processingSection').classList.add('hidden');
+    document.getElementById('resultsSection').classList.remove('hidden');
+  }catch(err){
+    log.innerHTML+=`<p class="log-line error">✗ Pipeline Error: ${err.message}</p>`;
   }
 }
 
-function renderResults(matRes, labRes) {
-  // Render Materials
-  const mBody = document.getElementById('matBody');
-  mBody.innerHTML = matRes.map(m => `<tr>
-    <td>${m.no}</td><td>${m.desc}</td><td>${m.unit}</td><td>${m.qty}</td>
-    <td class="${m.unitRate?'':'text-red-400'}">${m.unitRate ? 'R '+m.unitRate.toLocaleString() : '—'}</td>
-    <td>${m.total ? 'R '+m.total.toLocaleString() : '—'}</td>
-    <td><a href="${m.url}" target="_blank" class="text-blue-400">${m.supplier}</a></td>
-  </tr>`).join('');
-  
-  // Render Labour
-  const lBody = document.getElementById('labBody');
-  lBody.innerHTML = labRes.map(l => `<tr>
-    <td>${l.no}</td><td>${l.desc}</td><td class="text-amber-400">${l.trade}</td>
-    <td>${l.rate ? 'R '+l.rate : '—'}</td><td>${l.total ? 'R '+l.total : '—'}</td>
-  </tr>`).join('');
+function renderOutput(matItems,matRes,labRes,evData){
+  const matBody=document.getElementById('matBody'); matBody.innerHTML='';
+  matItems.forEach((it,idx)=>{
+    const pr=matRes.find(r=>r.no===it.no)||{unitRate:0,total:0,supplier:'—',url:'#',notes:'No Match'};
+    matBody.innerHTML+=`<tr><td>${it.no}</td><td>${escapeHtml(it.desc)}</td><td>${it.unit}</td><td>${it.qty}</td><td class="text-right font-mono">${pr.unitRate>0?'R '+pr.unitRate.toLocaleString():'—'}</td><td class="text-right font-mono">${pr.total>0?'R '+pr.total.toLocaleString():'—'}</td><td>${pr.supplier}</td><td class="text-xs truncate max-w-[100px]" title="${pr.url}"><a href="${pr.url}" target="_blank" class="text-blue-400 hover:underline">Link</a></td><td>${escapeHtml(pr.notes)}</td></tr>`;
+  });
 
-  // Render Summary
-  const sumMat = matRes.reduce((a,b) => a + (b.total||0), 0);
-  const sumLab = labRes.reduce((a,b) => a + (b.total||0), 0);
-  const sub = sumMat + sumLab;
-  document.getElementById('sumMat').innerText = 'R ' + sumMat.toLocaleString();
-  document.getElementById('sumLab').innerText = 'R ' + sumLab.toLocaleString();
-  document.getElementById('sumVat').innerText = 'R ' + (sub*0.15).toLocaleString();
-  document.getElementById('sumTotal').innerText = 'R ' + (sub*1.15).toLocaleString();
+  const labBody=document.getElementById('labBody'); labBody.innerHTML='';
+  labourResults.forEach(lr=>{
+    labBody.innerHTML+=`<tr><td>${lr.no}</td><td>${escapeHtml(lr.desc)}</td><td class="text-amber-400 font-semibold">${lr.trade||'General'}</td><td>${lr.unit}</td><td>${lr.qty}</td><td class="text-right font-mono">${lr.rate?'R '+lr.rate.toLocaleString():'—'}</td><td class="text-right font-mono">${lr.total>0?'R '+lr.total.toLocaleString():'—'}</td><td class="text-xs">${lr.source||'N/A'}</td><td class="text-xs text-yellow-400">${lr.flag||''}</td></tr>`;
+  });
+
+  const evBody=document.getElementById('evidBody'); evBody.innerHTML='';
+  evData.forEach(ev=>{
+    evBody.innerHTML+=`<tr><td>${ev.itemNo}</td><td>${ev.supplier}</td><td class="text-xs truncate max-w-[100px]"><a href="${ev.url}" target="_blank" class="text-blue-400 hover:underline">View</a></td><td class="text-right font-mono">${ev.price?'R '+ev.price.toLocaleString():'—'}</td><td>${ev.inStock?'Yes':'No'}</td><td>${ev.date}</td><td>${ev.rank}</td></tr>`;
+  });
+
+  const sumMat=materialResults.reduce((a,b)=>a+(b.total||0),0);
+  const sumLab=labourResults.reduce((a,b)=>a+(b.total||0),0);
+  const sub=sumMat+sumLab;
+  document.getElementById('sumMat').textContent='R '+sumMat.toLocaleString();
+  document.getElementById('sumLab').textContent='R '+sumLab.toLocaleString();
+  document.getElementById('sumSub').textContent='R '+sub.toLocaleString();
+  document.getElementById('sumVat').textContent='R '+(sub*0.15).toLocaleString();
+  document.getElementById('sumGrand').textContent='R '+(sub*1.15).toLocaleString();
 }
 
-function switchTab(idx) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
-  ['matTab', 'labTab', 'sumTab'].forEach((id, i) => document.getElementById(id).classList.toggle('hidden', i!==idx));
+function switchTab(idx){
+  document.querySelectorAll('#tabsNav .tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  ['tab0','tab1','tab2','tab3'].forEach((id,i)=>{const el=document.getElementById(id);el.classList.toggle('hidden',i!==idx);});
 }
+function loadSample(){document.getElementById('boqInput').value=`1\n|\nSupply and deliver Surge Arrestors Class 1 + 2 3ph+N\neach\n1\n2\n|\nRemove and install 22kW Contactor DOL starter\nlot\n2\n3\n|\nSupply and deliver 16mm Panel Flex Cable\nm\n100`;updateStats();}
+function clearInput(){document.getElementById('boqInput').value='';updateStats();}
+function exportCSV(){
+  let csv='Item,Description,Unit,Qty,Unit Rate R,Total R,Supplier,URL,Notes\n';
+  materialResults.forEach(i=>csv+=`${i.no},"${i.desc}",${i.unit},${i.qty},${i.unitRate},${i.total},${i.supplier},${i.url},"${i.notes}"\n`);
+  csv+='\nLabour & Installation\n';
+  labourResults.forEach(i=>csv+=`${i.no},"${i.desc}",${i.trade},${i.unit},${i.qty},${i.rate},${i.total},${i.source},${i.flag}\n`);
+  csv+='\nEvidence Log\nItem,Supplier,URL,Price,Rank\n';
+  evidenceData.forEach(e=>csv+=`${e.itemNo},${e.supplier},${e.url},${e.price},${e.rank}\n`);
+  const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Khuthadzo_V4_Priced_BOQ.csv'; a.click();
+}
+function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 </script>
 </body>
 </html>
