@@ -9,7 +9,6 @@ const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY || '31aeb09ca552be7ed6cbcd83
 const MAX_CONCURRENCY = parseInt(process.env.MAX_CONCURRENCY) || 3;
 const limit = pLimit(MAX_CONCURRENCY);
 
-// Official SA Labour Rate Benchmarks (ZAR)
 const LABOUR_RATES = {
   'Electrician': { rate: 245, unit: 'hr', authority: 'MBSA / ECA Bargaining Council' },
   'Plumber': { rate: 235, unit: 'hr', authority: 'PIBC / CETA Benchmark' },
@@ -47,7 +46,6 @@ function detectCategory(desc) {
 }
 
 function generateQuery(desc) {
-  // FIXED: Safe string handling & corrected regex that previously wiped the query
   const safeDesc = (desc || '').toString();
   const clean = safeDesc.replace(/supply\sand\sdeliver|remove\sand\sinstall|install|complete|or\s+equivalent|provisional|pc\sitem/gi, '')
     .replace(/[^\w\s\d\.\-\/]/g, ' ').trim();
@@ -63,7 +61,6 @@ async function searchSuppliers(query, category) {
     let urls = (res.data.organic || []).map(r => r.link);
     const priority = SUPPLIER_PRIORITY[category] || [];
     
-    // Prioritise trusted SA suppliers
     urls.sort((a, b) => {
       const aP = priority.findIndex(p => a.includes(p));
       const bP = priority.findIndex(p => b.includes(p));
@@ -88,7 +85,6 @@ async function extractPrice(url) {
     const $ = cheerio.load(res.data);
     let price = null, inStock = false;
 
-    // 1. JSON-LD Structured Data
     $('script[type="application/ld+json"]').each((i, el) => {
       try {
         const d = JSON.parse($(el).html());
@@ -100,14 +96,12 @@ async function extractPrice(url) {
       } catch {}
     });
 
-    // 2. Open Graph Meta Tags
     if (!price) {
       const og = $('meta[property="product:price:amount"]').attr('content');
       if (og) price = parseFloat(og);
       if ($('meta[property="product:availability"]').attr('content')?.toLowerCase().includes('instock')) inStock = true;
     }
 
-    // 3. Regex Fallback for ZAR formatting
     if (!price) {
       const body = $('body').text().replace(/\s+/g, ' ');
       const m = body.match(/R\s?(\d{1,3}(?:[\s,]?\d{3})*(?:\.\d{1,2})?)/);
@@ -130,7 +124,6 @@ exports.handler = async (event) => {
   try {
     const results = await Promise.all(items.map(item => limit(async () => {
       const desc = (item.description || item.desc || '').toString();
-      // Auto-detect labour if not explicitly flagged
       const isLabour = item.isLabour || /install|lay|fix|erect|excavat|demolish|paint|plaster|weld|connect|terminate|commission|test|hang|set|place|construct|provide|labour|fitting/gi.test(desc);
       const category = detectCategory(desc);
       

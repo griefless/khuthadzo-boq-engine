@@ -3,80 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Khuthadzo V4 BOQ Engine</title>
+  <title>Kuthadzo V4 BOQ Engine</title>
   <style>
-    :root { --primary: #0056b3; --bg: #f4f7f6; --text: #333; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-    .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    h1 { color: var(--primary); margin-top: 0; }
-    .upload-zone { border: 2px dashed #ccc; padding: 40px; text-align: center; border-radius: 8px; margin-bottom: 20px; cursor: pointer; transition: 0.3s; }
-    .upload-zone:hover { border-color: var(--primary); background: #f0f8ff; }
-    .btn { background: var(--primary); color: #fff; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    .tabs { display: flex; border-bottom: 2px solid #ddd; margin-top: 20px; }
-    .tab { padding: 10px 20px; cursor: pointer; border-bottom: 3px solid transparent; }
-    .tab.active { border-bottom-color: var(--primary); font-weight: bold; color: var(--primary); }
-    .tab-content { display: none; padding: 20px 0; overflow-x: auto; }
+    :root { --primary: #0056b3; --bg: #f8f9fa; --text: #333; --border: #dee2e6; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    h1 { margin: 0 0 5px; color: var(--primary); font-size: 24px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .upload-zone { border: 2px dashed var(--border); padding: 30px; text-align: center; border-radius: 6px; margin-bottom: 15px; background: #fafafa; transition: 0.2s; }
+    .upload-zone:hover { border-color: var(--primary); background: #f0f7ff; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 15px; }
+    .btn { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 14px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:disabled { background: #adb5bd; cursor: not-allowed; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .stats { font-size: 13px; color: #555; margin-left: auto; }
+    .console { background: #1e1e1e; color: #0f0; padding: 15px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 13px; height: 120px; overflow-y: auto; margin-bottom: 20px; }
+    .tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 15px; }
+    .tab { padding: 10px 20px; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; transition: 0.2s; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-content { display: none; }
     .tab-content.active { display: block; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f8f9fa; }
-    .log { background: #222; color: #0f0; padding: 15px; border-radius: 5px; font-family: monospace; height: 150px; overflow-y: auto; margin-bottom: 20px; }
-    .progress-bar { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
+    th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+    th { background: #f1f3f5; font-weight: 600; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .summary-card { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid var(--border); text-align: center; }
+    .summary-card h4 { margin: 0 0 8px; font-size: 13px; color: #666; }
+    .summary-card .val { font-size: 20px; font-weight: bold; color: var(--primary); }
+    textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; margin-bottom: 10px; resize: vertical; }
+    .progress-bar { height: 6px; background: #e9ecef; border-radius: 3px; margin: 10px 0; overflow: hidden; }
     .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-    .summary-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-    .summary-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ddd; }
-    .summary-card h3 { margin: 0 0 10px; font-size: 14px; color: #666; }
-    .summary-card .value { font-size: 24px; font-weight: bold; color: var(--primary); }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Khuthadzo V4 BOQ Engine</h1>
-    <p>Specification Compliant Pricing Engine | MBSA • BIBC • CETA • SCRAPERAPI</p>
+    <h1>Kuthadzo V4 BOQ Engine</h1>
+    <div class="subtitle">Khuthadzo Supplies V4 | Specification Compliant Pricing Engine | MBSA • BIBC • CETA • SCRAPERAPI</div>
     
     <div class="upload-zone" id="dropZone">
-      <p>Drag & drop BOQ file here, or click to browse</p>
-      <p style="font-size: 12px; color: #666;">Supports PDF, XLSX, DOCX, JPG, PNG, TXT</p>
+      <h3>Upload Your Bill of Quantities</h3>
+      <p>Supports PDF, Excel, Word, Images (OCR), Text. Full Spec Compliance.</p>
+      <p style="color:var(--primary); font-weight:500;">Drag & drop BOQ file here, or browse files</p>
+      <p style="font-size:12px; color:#888;">PDF • XLSX • DOCX • JPG • PNG • TXT</p>
       <input type="file" id="fileInput" hidden accept=".pdf,.xlsx,.xls,.docx,.jpg,.jpeg,.png,.txt,.csv">
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label>Or Paste BOQ Data:</label>
-      <textarea id="pasteArea" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" placeholder="Paste text here..."></textarea>
+    <textarea id="pasteArea" rows="3" placeholder="Or Paste Data here..."></textarea>
+    
+    <div class="controls">
+      <button id="loadSample" class="btn btn-outline">Load Sample</button>
+      <button id="clearBtn" class="btn btn-secondary">Clear</button>
+      <span class="stats" id="statsDisplay">0 lines | 0 items detected</span>
+      <button id="researchBtn" class="btn btn-primary" disabled>Research & Price (V4 Spec)</button>
     </div>
 
-    <button id="researchBtn" class="btn" disabled>Research & Price (V4 Spec)</button>
-    <button id="clearBtn" class="btn" style="background:#6c757d; margin-left:10px;">Clear</button>
-
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="log" id="logConsole">Initializing... Ready for input.</div>
+    <div class="console" id="logConsole">Executing Live Research Pipeline...<br>Initializing...</div>
 
     <div class="tabs">
-      <div class="tab active" data-tab="tab1">Tab 1: Priced BOQ</div>
-      <div class="tab" data-tab="tab2">Tab 2: Labour</div>
-      <div class="tab" data-tab="tab3">Tab 3: Summary</div>
-      <div class="tab" data-tab="tab4">Tab 4: Evidence</div>
+      <div class="tab active" data-tab="tab1">Tab 1: Priced BOQ (Materials)</div>
+      <div class="tab" data-tab="tab2">Tab 2: Labour & Installation</div>
+      <div class="tab" data-tab="tab3">Tab 3: Financial Summary</div>
+      <div class="tab" data-tab="tab4">Tab 4: Evidence Log</div>
     </div>
 
     <div id="tab1" class="tab-content active">
-      <table id="materialsTable"><thead><tr><th>Item</th><th>Description</th><th>Unit</th><th>Qty</th><th>Unit Rate (R)</th><th>Total (R)</th><th>Supplier</th><th>URL</th><th>Flags</th></tr></thead><tbody></tbody></table>
+      <table id="materialsTable">
+        <thead><tr><th>Item</th><th>Description</th><th>Unit</th><th>Qty</th><th>Unit Rate (R)</th><th>Total (R)</th><th>Cheapest Supplier</th><th>Supplier URL</th><th>Notes / Flags</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
+
     <div id="tab2" class="tab-content">
-      <table id="labourTable"><thead><tr><th>Item</th><th>Description</th><th>Trade</th><th>Unit</th><th>Qty</th><th>Rate (R)</th><th>Total (R)</th><th>Source</th><th>Flag</th></tr></thead><tbody></tbody></table>
+      <table id="labourTable">
+        <thead><tr><th>Item</th><th>Description</th><th>Trade / Skill Level</th><th>Unit</th><th>Qty</th><th>Rate (R)</th><th>Total (R)</th><th>Source Authority</th><th>Flag</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
+
     <div id="tab3" class="tab-content">
-      <div class="summary-box">
-        <div class="summary-card"><h3>Total Material Cost</h3><div class="value" id="matCost">R 0.00</div></div>
-        <div class="summary-card"><h3>Total Labour Cost</h3><div class="value" id="labCost">R 0.00</div></div>
-        <div class="summary-card"><h3>Sub-Total</h3><div class="value" id="subTotal">R 0.00</div></div>
-        <div class="summary-card"><h3>VAT @ 15%</h3><div class="value" id="vat">R 0.00</div></div>
-        <div class="summary-card"><h3>Grand Total</h3><div class="value" id="grandTotal">R 0.00</div></div>
+      <div class="summary-grid">
+        <div class="summary-card"><h4>Total Material Cost (excl. VAT)</h4><div class="val" id="matCost">R 0,00</div></div>
+        <div class="summary-card"><h4>Total Labour Cost (Guideline)</h4><div class="val" id="labCost">R 0,00</div></div>
+        <div class="summary-card"><h4>Contingency (if applicable)</h4><div class="val" id="contingency">R 0,00</div></div>
+        <div class="summary-card"><h4>Sub-Total</h4><div class="val" id="subTotal">R 0,00</div></div>
+        <div class="summary-card"><h4>VAT @ 15%</h4><div class="val" id="vat">R 0,00</div></div>
+        <div class="summary-card"><h4>Grand Total Bid Value</h4><div class="val" id="grandTotal">R 0,00</div></div>
       </div>
     </div>
+
     <div id="tab4" class="tab-content">
-      <table id="evidenceTable"><thead><tr><th>Item</th><th>Supplier</th><th>URL</th><th>Price</th><th>Stock</th><th>Date</th><th>Rank</th></tr></thead><tbody></tbody></table>
+      <table id="evidenceTable">
+        <thead><tr><th>Item</th><th>Supplier Name</th><th>URL</th><th>Price Found (R)</th><th>In Stock</th><th>Date Retrieved</th><th>Rank</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
+
+    <button id="exportBtn" class="btn btn-primary" style="margin-top:15px;">Export Full Report</button>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -90,28 +115,40 @@
     const log = document.getElementById('logConsole');
     const progressFill = document.getElementById('progressFill');
     const researchBtn = document.getElementById('researchBtn');
+    const statsDisplay = document.getElementById('statsDisplay');
     
-    function addLog(msg) { log.innerHTML += `<div>${msg}</div>`; log.scrollTop = log.scrollHeight; }
+    function addLog(msg) { log.innerHTML += `<br>${msg}`; log.scrollTop = log.scrollHeight; }
+    function updateStats() { statsDisplay.textContent = `${parsedItems.length} lines | ${parsedItems.length} items detected`; }
 
     document.getElementById('dropZone').addEventListener('click', () => document.getElementById('fileInput').click());
     document.getElementById('fileInput').addEventListener('change', handleFile);
     document.getElementById('dropZone').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.style.borderColor = '#0056b3'; });
-    document.getElementById('dropZone').addEventListener('dragleave', e => { e.currentTarget.style.borderColor = '#ccc'; });
+    document.getElementById('dropZone').addEventListener('dragleave', e => { e.currentTarget.style.borderColor = '#dee2e6'; });
     document.getElementById('dropZone').addEventListener('drop', e => {
-      e.preventDefault(); e.currentTarget.style.borderColor = '#ccc';
+      e.preventDefault(); e.currentTarget.style.borderColor = '#dee2e6';
       if(e.dataTransfer.files.length) handleFile({ target: { files: e.dataTransfer.files } });
     });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
       parsedItems = []; document.getElementById('pasteArea').value = ''; document.getElementById('fileInput').value = '';
-      researchBtn.disabled = true;
+      researchBtn.disabled = true; updateStats();
       ['materialsTable','labourTable','evidenceTable'].forEach(id => document.querySelector(`#${id} tbody`).innerHTML = '');
-      ['matCost','labCost','subTotal','vat','grandTotal'].forEach(id => document.getElementById(id).textContent = 'R 0.00');
+      ['matCost','labCost','contingency','subTotal','vat','grandTotal'].forEach(id => document.getElementById(id).textContent = 'R 0,00');
       progressFill.style.width = '0%'; log.innerHTML = 'Cleared. Ready.';
     });
 
     document.getElementById('pasteArea').addEventListener('input', () => {
       if(document.getElementById('pasteArea').value.trim().length > 10) parseText(document.getElementById('pasteArea').value);
+    });
+
+    document.getElementById('loadSample').addEventListener('click', () => {
+      const sample = `1.1 Supply and deliver 500 bricks (Cement Stock)
+1.2 Install PVC drainage pipe 110mm (6m length)
+1.3 Labour for bricklaying per m²
+1.4 Supply 200L Jojo tank with fittings
+1.5 Paint interior walls (Plaster finish) per m²`;
+      document.getElementById('pasteArea').value = sample;
+      parseText(sample);
     });
 
     async function handleFile(e) {
@@ -135,7 +172,9 @@
         unit: (r.unit || 'each').toString().toLowerCase().replace(/metres|meters/g,'m').replace(/linear\s*m/g,'lm').replace(/square\s*m/g,'m²').replace(/cubic\s*m/g,'m³').replace(/hours?/g,'hr').replace(/kilograms?/g,'kg').replace(/tonnes?/g,'t'),
         qty: parseFloat(r.qty || r.quantity || 1) || 1
       })).filter(it => it.description.length > 3);
+      
       addLog(`✔ Parsed ${parsedItems.length} valid line items.`);
+      updateStats();
       researchBtn.disabled = parsedItems.length === 0;
     }
 
@@ -148,7 +187,12 @@
 
     async function parsePDF(file) {
       const data = await file.arrayBuffer(); const pdf = await pdfjsLib.getDocument({ data }).promise; let text = '';
-      for(let i=1; i<=pdf.numPages; i++) { const page = await pdf.getPage(i); const content = await page.getTextContent(); text += content.items.map(s => s.str).join(' ') + '\n'; }
+      for(let i=1; i<=pdf.numPages; i++) { 
+        const page = await pdf.getPage(i); 
+        const content = await page.getTextContent(); 
+        // FIXED: Join with newlines to preserve row structure
+        text += content.items.map(s => s.str).join('\n') + '\n'; 
+      }
       parseText(text);
     }
 
@@ -161,8 +205,16 @@
     }
 
     function parseText(text) {
-      const lines = text.split('\n').filter(l => l.trim().length > 5);
-      const rows = lines.map(l => { const match = l.match(/(\d+\.?\d*)\s*(m²|m³|lm|hr|kg|t|each|nr|m|l)?/i); return { description: l, qty: match ? parseFloat(match[1]) : 1, unit: match ? match[2] : 'each' }; });
+      // FIXED: Split by newline, filter short lines, extract qty/unit properly
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 5);
+      const rows = lines.map(l => { 
+        const match = l.match(/(\d+\.?\d*)\s*(m²|m³|lm|hr|kg|t|each|nr|m|l|no)?\s*$/i);
+        return { 
+          description: match ? l.replace(match[0], '').trim() : l.trim(), 
+          qty: match ? parseFloat(match[1]) : 1, 
+          unit: match ? (match[2] || 'each') : 'each' 
+        }; 
+      });
       normalizeItems(rows);
     }
 
@@ -186,17 +238,33 @@
       const matTable = document.querySelector('#materialsTable tbody'); const labTable = document.querySelector('#labourTable tbody'); const evTable = document.querySelector('#evidenceTable tbody');
       matTable.innerHTML = ''; labTable.innerHTML = ''; evTable.innerHTML = ''; let matCost = 0, labCost = 0;
       results.forEach(r => {
-        if(r.isLabour) { labCost += r.total || 0; labTable.innerHTML += `<tr><td>${r.item}</td><td>${r.description}</td><td>${r.trade}</td><td>${r.unit}</td><td>${r.qty}</td><td>R ${r.unitRate?.toFixed(2)}</td><td>R ${r.total?.toFixed(2)}</td><td>${r.source}</td><td>${r.flag}</td></tr>`; }
-        else { matCost += r.total || 0; matTable.innerHTML += `<tr><td>${r.item}</td><td>${r.description}</td><td>${r.unit}</td><td>${r.qty}</td><td>R ${r.unitRate?.toFixed(2)}</td><td>R ${r.total?.toFixed(2)}</td><td>${r.supplier}</td><td><a href="${r.supplierUrl}" target="_blank">Link</a></td><td>${r.flag}</td></tr>`;
+        if(r.isLabour) { 
+          labCost += r.total || 0; 
+          labTable.innerHTML += `<tr><td>${r.item}</td><td>${r.description}</td><td>${r.trade}</td><td>${r.unit}</td><td>${r.qty}</td><td>R ${r.unitRate?.toFixed(2)}</td><td>R ${r.total?.toFixed(2)}</td><td>${r.source}</td><td>${r.flag}</td></tr>`; 
+        } else { 
+          matCost += r.total || 0; 
+          matTable.innerHTML += `<tr><td>${r.item}</td><td>${r.description}</td><td>${r.unit}</td><td>${r.qty}</td><td>R ${r.unitRate?.toFixed(2)}</td><td>R ${r.total?.toFixed(2)}</td><td>${r.supplier}</td><td><a href="${r.supplierUrl}" target="_blank">Link</a></td><td>${r.flag}</td></tr>`;
           if(r.evidence) r.evidence.forEach((ev, idx) => { evTable.innerHTML += `<tr><td>${r.item}</td><td>${ev.url.split('/')[2]}</td><td><a href="${ev.url}" target="_blank">Link</a></td><td>R ${ev.price?.toFixed(2)}</td><td>${ev.inStock ? 'Yes' : 'No'}</td><td>${ev.date}</td><td>${idx+1}</td></tr>`; });
         }
       });
       const sub = matCost + labCost; const vat = sub * 0.15;
-      document.getElementById('matCost').textContent = `R ${matCost.toFixed(2)}`; document.getElementById('labCost').textContent = `R ${labCost.toFixed(2)}`;
-      document.getElementById('subTotal').textContent = `R ${sub.toFixed(2)}`; document.getElementById('vat').textContent = `R ${vat.toFixed(2)}`; document.getElementById('grandTotal').textContent = `R ${(sub+vat).toFixed(2)}`;
+      const fmt = v => 'R ' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      document.getElementById('matCost').textContent = fmt(matCost); document.getElementById('labCost').textContent = fmt(labCost);
+      document.getElementById('contingency').textContent = 'R 0,00';
+      document.getElementById('subTotal').textContent = fmt(sub); document.getElementById('vat').textContent = fmt(vat); document.getElementById('grandTotal').textContent = fmt(sub+vat);
     }
 
     document.querySelectorAll('.tab').forEach(t => { t.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); t.classList.add('active'); document.getElementById(t.dataset.tab).classList.add('active'); }); });
+    
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      addLog('📥 Exporting report...');
+      let csv = "Item,Description,Unit,Qty,Unit Rate,Total,Supplier,Flag\n";
+      document.querySelectorAll('#materialsTable tbody tr').forEach(row => {
+        csv += Array.from(row.cells).map(c => `"${c.innerText.replace(/"/g,'""')}"`).join(",") + "\n";
+      });
+      const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'BOQ_Priced_Report.csv'; a.click();
+    });
   </script>
 </body>
 </html>
